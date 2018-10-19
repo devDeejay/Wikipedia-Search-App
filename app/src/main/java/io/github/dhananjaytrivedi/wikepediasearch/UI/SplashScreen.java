@@ -1,8 +1,10 @@
-package io.github.dhananjaytrivedi.wikepediasearch;
+package io.github.dhananjaytrivedi.wikepediasearch.UI;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import io.github.dhananjaytrivedi.wikepediasearch.R;
 
 public class SplashScreen extends AppCompatActivity {
 
@@ -11,7 +13,7 @@ public class SplashScreen extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Intent intent = new Intent(SplashScreen.this, InputSearchActivity.class);
+        Intent intent = new Intent(SplashScreen.this, SearchActivity.class);
         startActivity(intent);
 
     }

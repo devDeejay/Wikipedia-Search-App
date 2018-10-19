@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".InputSearchActivity">
+    tools:context=".UI.SearchActivity">
 
     <RelativeLayout
         android:id="@+id/userInputLayout"
@@ -49,7 +49,7 @@
                 android:lines="1"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
-                android:textColor="#ffffff"
+                android:textColor="#000000"
                 android:textColorHint="#666666"
                 android:textSize="14sp" />
 
@@ -57,13 +57,48 @@
                 android:id="@+id/searchResultSubmitButton"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
-                android:adjustViewBounds="true"
                 android:src="@drawable/search" />
 
         </LinearLayout>
 
-
     </RelativeLayout>
 
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_marginTop="10dp"
+        android:layout_below="@id/userInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical">
+
+    </android.support.v7.widget.RecyclerView>
+
+
+    <RelativeLayout
+        android:id="@+id/errorMessageLayout"
+        android:layout_below="@id/userInputLayout"
+        android:layout_width="match_parent"
+        android:layout_marginTop="30dp"
+        tools:visibility="invisible"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/errorMessageTV"
+            android:layout_width="match_parent"
+            android:textAlignment="center"
+            android:layout_height="wrap_content"
+            android:textSize="24sp"
+            android:text="Oops, No results found!"
+            />
+
+        <ImageView
+            android:layout_marginTop="20dp"
+            android:id="@+id/errorMessageIV"
+            android:layout_below="@id/errorMessageTV"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/error"/>
+
+    </RelativeLayout>
 
 </RelativeLayout>

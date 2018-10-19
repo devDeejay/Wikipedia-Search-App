@@ -1,6 +1,7 @@
 package io.github.dhananjaytrivedi.wikepediasearch.UI;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.design.widget.Snackbar;
@@ -9,6 +10,8 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -39,20 +42,16 @@ public class SearchActivity extends AppCompatActivity {
 
     final String TAG = "DJ";
     ArrayList<Result> resultsList = new ArrayList<>();
-    private RecyclerView.Adapter adapter;
-
     @BindView(R.id.searchResultSubmitButton)
     ImageView searchSubmitButton;
-
     @BindView(R.id.inputQueryET)
     EditText inputQueryEditText;
-
     @BindView(R.id.recyclerView)
     RecyclerView recyclerView;
-
     @BindView(R.id.errorMessageLayout)
     RelativeLayout errorMessage;
 
+    private ResultAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
 
     @Override
@@ -70,8 +69,7 @@ public class SearchActivity extends AppCompatActivity {
                 if (isNetworkAvailable()) {
                     if (inputQueryEditText.getText().toString().equals("")) {
                         showSnackbarMessage("We don't know what to look for");
-                    }
-                    else {
+                    } else {
                         getResultsFromAPI();
                     }
                 } else {
@@ -104,8 +102,7 @@ public class SearchActivity extends AppCompatActivity {
                     resultsList = parseJSONData(response);
                     if (resultsList == null) {
                         updateDisplayForNoData();
-                    }
-                    else {
+                    } else {
                         updateDisplayWithResultsData();
                     }
                 } catch (JSONException e) {
@@ -129,9 +126,18 @@ public class SearchActivity extends AppCompatActivity {
 
         Log.d(TAG, "*************** UPDATING LAYOUT ***************");
 
-        adapter = new ResultAdapter(resultsList, SearchActivity.this, null);
-        recyclerView.setAdapter(adapter);
+        /*
+        int position = recyclerView.getChildAdapterPosition(child);
+        String pageID = resultsList.get(position).getPageID();
+        String title = resultsList.get(position).getTitle();
+        Intent i = new Intent(SearchActivity.this, BrowserActivity.class);
+        i.putExtra("pageID", pageID);
+        i.putExtra("title", title);
+        startActivity(i);
+        */
 
+        adapter = new ResultAdapter(resultsList, SearchActivity.this);
+        recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(SearchActivity.this));
 
     }
@@ -156,11 +162,11 @@ public class SearchActivity extends AppCompatActivity {
                 String pageID = page.getString("pageid");
                 String title = page.getString("title");
                 String description = page.getString("description");
-                String imageURL = "";
+                String imageURL = "default";
                 if (page.has("thumbnail")) {
 
                     JSONObject thumbnailObject = page.getJSONObject("thumbnail");
-                    imageURL =  thumbnailObject.getString("source");
+                    imageURL = thumbnailObject.getString("source");
 
                 }
 
@@ -181,7 +187,6 @@ public class SearchActivity extends AppCompatActivity {
             return null;
         }
     }
-
 
     /*
      * This method check whether the device is connected to Internet or not

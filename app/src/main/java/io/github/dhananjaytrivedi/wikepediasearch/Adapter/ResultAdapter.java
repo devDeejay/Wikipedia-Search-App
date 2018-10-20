@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.IllegalFormatCodePointException;
 
+import io.github.dhananjaytrivedi.wikepediasearch.DAO.WikiResultsStorage;
 import io.github.dhananjaytrivedi.wikepediasearch.Model.Result;
 import io.github.dhananjaytrivedi.wikepediasearch.R;
 import io.github.dhananjaytrivedi.wikepediasearch.UI.BrowserActivity;
@@ -33,8 +35,13 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ResultsVie
 
     public ResultAdapter(ArrayList<Result> list, final Context context) {
 
-        resultArraylist = list;
         this.context = context;
+        this.resultArraylist = list;
+
+        for (Result result : list) {
+            Log.d(TAG, result.getTitle());
+        }
+
     }
 
     // Creating Views, Runs in the beginning
@@ -111,12 +118,17 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ResultsVie
         public void onClick(View view) {
 
             int position = getAdapterPosition();
-            String pageID = resultArraylist.get(position).getPageID();
-            String title = resultArraylist.get(position).getTitle();
+
+            Result result = resultArraylist.get(position);
+
+            String pageID = result.getPageID();
+            String title = result.getTitle();
             Intent i = new Intent(context, BrowserActivity.class);
             i.putExtra("pageID", pageID);
             i.putExtra("title", title);
             context.startActivity(i);
+
+            WikiResultsStorage.addNewResultObjectToStore(result, context);
 
         }
     }

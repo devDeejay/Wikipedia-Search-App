@@ -27,6 +27,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -35,6 +41,7 @@ import java.util.Set;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.github.dhananjaytrivedi.wikepediasearch.Adapter.ResultAdapter;
+import io.github.dhananjaytrivedi.wikepediasearch.DAO.WikiResultsStorage;
 import io.github.dhananjaytrivedi.wikepediasearch.Model.Result;
 import io.github.dhananjaytrivedi.wikepediasearch.R;
 
@@ -42,6 +49,7 @@ public class SearchActivity extends AppCompatActivity {
 
     final String TAG = "DJ";
     ArrayList<Result> resultsList = new ArrayList<>();
+    ArrayList<Result> visitedPages = new ArrayList<>();
     @BindView(R.id.searchResultSubmitButton)
     ImageView searchSubmitButton;
     @BindView(R.id.inputQueryET)
@@ -62,6 +70,9 @@ public class SearchActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         errorMessage.setVisibility(View.INVISIBLE);
 
+        // Facing Exceptions while Parsing the stored JSON Data, Rest App is working
+        // showPastVisitedPages();
+
         searchSubmitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -77,6 +88,23 @@ public class SearchActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void showPastVisitedPages() {
+        visitedPages = WikiResultsStorage.readPastVisitedPagesFromStorage(SearchActivity.this);
+        if (visitedPages != null) {
+            for (Result result : visitedPages) {
+                Log.d(TAG, result.getTitle());
+            }
+            //updateDisplayWithResultsData(visitedPages);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        WikiResultsStorage.writeVisitedPagesToStorage(SearchActivity.this);
+
     }
 
     private void showSnackbarMessage(String inputMessageString) {
@@ -103,7 +131,7 @@ public class SearchActivity extends AppCompatActivity {
                     if (resultsList == null) {
                         updateDisplayForNoData();
                     } else {
-                        updateDisplayWithResultsData();
+                        updateDisplayWithResultsData(resultsList);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -122,21 +150,11 @@ public class SearchActivity extends AppCompatActivity {
 
     }
 
-    private void updateDisplayWithResultsData() {
+    private void updateDisplayWithResultsData(ArrayList<Result> results) {
 
         Log.d(TAG, "*************** UPDATING LAYOUT ***************");
 
-        /*
-        int position = recyclerView.getChildAdapterPosition(child);
-        String pageID = resultsList.get(position).getPageID();
-        String title = resultsList.get(position).getTitle();
-        Intent i = new Intent(SearchActivity.this, BrowserActivity.class);
-        i.putExtra("pageID", pageID);
-        i.putExtra("title", title);
-        startActivity(i);
-        */
-
-        adapter = new ResultAdapter(resultsList, SearchActivity.this);
+        adapter = new ResultAdapter(results, SearchActivity.this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(SearchActivity.this));
 

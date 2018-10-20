@@ -1,108 +1,123 @@
 package io.github.dhananjaytrivedi.wikepediasearch.DAO;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
-import android.util.Log;
+import android.content.SharedPreferences;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonParser;
+import com.google.gson.internal.LinkedTreeMap;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 
 import io.github.dhananjaytrivedi.wikepediasearch.Model.Result;
 
 public class WikiResultsStorage {
-    private static ArrayList<Result> visitedPagesForOneSession = new ArrayList<>();
+
+    static SharedPreferences sharedpreferences;
+
+    private static ArrayList<Result> newVisitedPagesArrayList = new ArrayList<>();
+
     final static String TAG = "STORAGE";
 
-    public static void writeVisitedPagesToStorage(Context context) {
+    public static void saveVisitedPagesInSharedPreferences(Context context) {
 
-        // First Get The Stored Array list
-        ArrayList<Result> storedResults = readPastVisitedPagesFromStorage(context);
+        if (newVisitedPagesArrayList.isEmpty()) {
+            // If there is nothing new added, no need to procced
+            return;
+        }
 
-        if (storedResults != null) { // If there is an existing data we need to append new data to that
+        // 1.1 First Get The Stored Array list
+        ArrayList<Result> storedResults = getStoredPagesArrayList(context);
+
+        // 1.2 If there is an existing data we need to append new data to that
+        if (storedResults != null) {
             // Add Your New List Items to that
-            storedResults.addAll(visitedPagesForOneSession);
-        }
-        else {
-            // For First Time We are adding something
-            storedResults = visitedPagesForOneSession;
-        }
 
-        // Parse whole list into JSON (I know it's not the best way forward)
-        String jsonFromJavaArrayList = getJsonStringFromArraylist(storedResults);
-
-        String filename = "storage_file";
-
-        try {
-            FileOutputStream fileOutputStream = context.openFileOutput(filename, Context.MODE_PRIVATE);
-            fileOutputStream.write(jsonFromJavaArrayList.getBytes());
-            fileOutputStream.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    public static ArrayList<Result> readPastVisitedPagesFromStorage(Context context) {
-        String storedArrayListAsJSONString = readStringFromStorage(context);
-        ArrayList<Result> storedPages = getArrayListFromJSONString(storedArrayListAsJSONString);
-        return storedPages;
-    }
-
-    @Nullable
-    private static String readStringFromStorage(Context context) {
-
-        String storedArrayList = "";
-        try {
-            FileInputStream fileInputStream = context.openFileInput("storage_file");
-            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            StringBuffer stringBuffer = new StringBuffer();
-
-            while ((storedArrayList = bufferedReader.readLine()) != null) {
-                stringBuffer.append(storedArrayList);
+            for (Result result : newVisitedPagesArrayList) {
+                if (storedResults.contains(result)) {
+                    storedResults.remove(result);
+                }
+                storedResults.add(result);
             }
-
-            storedArrayList = stringBuffer.toString();
-
-        } catch (FileNotFoundException e) {
-            Log.d(TAG, e.getMessage());
-        } catch (IOException e) {
-            Log.d(TAG, e.getMessage());
+        } else {
+            // For First Time We are adding something
+            storedResults = newVisitedPagesArrayList;
         }
-        return storedArrayList;
+
+        // 1.4 Parse whole list into JSON (I know it's not the best way forward)
+        String serializedJSONString = serializeObject(storedResults);
+
+        // 1.5 Write to Shared Preferences
+        SharedPreferences.Editor editor = sharedpreferences.edit();
+        editor.putString("jsonData", serializedJSONString);
+        editor.apply();
+
     }
 
-    private static ArrayList<Result> getArrayListFromJSONString(String storedArrayList) {
-        JsonParser jsonParser = new JsonParser();
-        Gson googleJson = new Gson();
-        if (!storedArrayList.equals("")){
-            JsonArray arrayFromString = jsonParser.parse(storedArrayList.trim()).getAsJsonArray();
-            ArrayList<Result> list = googleJson.fromJson(arrayFromString, ArrayList.class);
+    public static ArrayList<Result> getStoredPagesArrayList(Context context) {
+
+        // First Get the String from the Storage File
+        String storedArrayListAsJSONString = readFromSharedPreferences(context);
+
+        // Get the arraylist from that string
+        return getResultsObjectArrayList(storedArrayListAsJSONString);
+
+    }
+
+    private static String readFromSharedPreferences(Context context) {
+
+        sharedpreferences = context.getSharedPreferences("SharedPreferences", Context.MODE_PRIVATE);
+        return sharedpreferences.getString("jsonData", "");
+    }
+
+    private static ArrayList<Result> getResultsObjectArrayList(String json) {
+
+        ArrayList<Result> resultsList = new ArrayList<>();
+
+        ArrayList list = deserializeObject(json);
+
+        // If there is no data, just return null
+        if (list == null) {
+            return null;
+        }
+
+        Iterator iterator = list.iterator();
+        while (iterator.hasNext()) {
+            Result result = new Result();
+            LinkedTreeMap<String, String> object = (LinkedTreeMap<String, String>) iterator.next();
+            result.setDescription(object.get("description"));
+            result.setPageID(object.get("pageID"));
+            result.setImageURL(object.get("imageURL"));
+            result.setTitle(object.get("title"));
+            resultsList.add(result);
+        }
+
+        return resultsList;
+
+    }
+
+    private static ArrayList deserializeObject(String jsonString) {
+        ArrayList list = new Gson().fromJson(jsonString, ArrayList.class);
+
+        if (list != null) {
             return list;
         }
+
         return null;
     }
 
-    private static String getJsonStringFromArraylist(ArrayList<Result> list) {
-        Gson gsonBuilder = new GsonBuilder().create();
-        String jsonFromJavaArrayList = gsonBuilder.toJson(list);
-        System.out.println(jsonFromJavaArrayList);
-        return jsonFromJavaArrayList;
+    private static String serializeObject(ArrayList<Result> list) {
+
+        return new Gson().toJson(list);
+
     }
 
-    public static void addNewResultObjectToStore(Result result, Context context) {
-        visitedPagesForOneSession.add(result);
+    public static void addNewResultObjectToStore(Result result) {
+        if (!newVisitedPagesArrayList.contains(result)) {
+            newVisitedPagesArrayList.add(result);
+        }
     }
 }

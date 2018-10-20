@@ -18,6 +18,8 @@ public class Result {
         this.pageID = pageID;
         this.title = title;
         this.imageURL = imageURL;
+
+
         this.description = description;
     }
 
@@ -51,5 +53,18 @@ public class Result {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (o == this)
+            return true;
+        if (!(o instanceof Result))
+            return false;
+
+        Result object = (Result) o;
+
+        return (this.pageID == ((Result) o).pageID);
     }
 }

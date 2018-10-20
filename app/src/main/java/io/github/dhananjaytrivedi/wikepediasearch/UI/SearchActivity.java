@@ -1,7 +1,6 @@
 package io.github.dhananjaytrivedi.wikepediasearch.UI;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.design.widget.Snackbar;
@@ -10,8 +9,6 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -22,21 +19,14 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -60,7 +50,6 @@ public class SearchActivity extends AppCompatActivity {
     RelativeLayout errorMessage;
 
     private ResultAdapter adapter;
-    private RecyclerView.LayoutManager layoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,8 +59,7 @@ public class SearchActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         errorMessage.setVisibility(View.INVISIBLE);
 
-        // Facing Exceptions while Parsing the stored JSON Data, Rest App is working
-        // showPastVisitedPages();
+        showPastVisitedPages();
 
         searchSubmitButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,19 +79,20 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     private void showPastVisitedPages() {
-        visitedPages = WikiResultsStorage.readPastVisitedPagesFromStorage(SearchActivity.this);
+        visitedPages = WikiResultsStorage.getStoredPagesArrayList(SearchActivity.this);
+        Collections.reverse(visitedPages);
         if (visitedPages != null) {
             for (Result result : visitedPages) {
                 Log.d(TAG, result.getTitle());
             }
-            //updateDisplayWithResultsData(visitedPages);
+            updateDisplayWithResultsData(visitedPages);
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        WikiResultsStorage.writeVisitedPagesToStorage(SearchActivity.this);
+        WikiResultsStorage.saveVisitedPagesInSharedPreferences(SearchActivity.this);
 
     }
 
@@ -136,7 +125,6 @@ public class SearchActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
             }
         }, new Response.ErrorListener() {
             @Override
@@ -181,11 +169,10 @@ public class SearchActivity extends AppCompatActivity {
                 String title = page.getString("title");
                 String description = page.getString("description");
                 String imageURL = "default";
-                if (page.has("thumbnail")) {
 
+                if (page.has("thumbnail")) {
                     JSONObject thumbnailObject = page.getJSONObject("thumbnail");
                     imageURL = thumbnailObject.getString("source");
-
                 }
 
                 Result result = new Result();

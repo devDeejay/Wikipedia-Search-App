@@ -2,28 +2,24 @@ package io.github.dhananjaytrivedi.wikepediasearch.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.IllegalFormatCodePointException;
 
 import io.github.dhananjaytrivedi.wikepediasearch.DAO.WikiResultsStorage;
 import io.github.dhananjaytrivedi.wikepediasearch.Model.Result;
 import io.github.dhananjaytrivedi.wikepediasearch.R;
-import io.github.dhananjaytrivedi.wikepediasearch.UI.BrowserActivity;
-import io.github.dhananjaytrivedi.wikepediasearch.UI.SearchActivity;
 
 public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ResultsViewHolder> {
 
@@ -81,7 +77,6 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ResultsVie
                 .error(R.drawable.wiki_logo)
                 .into(holder.resultImageView);
 
-
     }
 
     // Size of the list to be displayed
@@ -116,19 +111,32 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ResultsVie
 
         @Override
         public void onClick(View view) {
-
             int position = getAdapterPosition();
 
             Result result = resultArraylist.get(position);
-
             String pageID = result.getPageID();
+
+            /*
+
+            // Custom Browser Activity Intent
+
             String title = result.getTitle();
             Intent i = new Intent(context, BrowserActivity.class);
             i.putExtra("pageID", pageID);
             i.putExtra("title", title);
             context.startActivity(i);
 
-            WikiResultsStorage.addNewResultObjectToStore(result, context);
+            */
+
+            // Mobile Browser Intent
+
+            String URL = "https://en.wikipedia.org/wiki?curid=" + pageID;
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setData(Uri.parse(URL));
+            context.startActivity(i);
+
+            // Saving This Item As It is visited
+            WikiResultsStorage.addNewResultObjectToStore(result);
 
         }
     }

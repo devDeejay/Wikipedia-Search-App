@@ -2,6 +2,7 @@ package io.github.dhananjaytrivedi.wikepediasearch.DAO;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
@@ -24,25 +25,43 @@ public class WikiResultsStorage {
 
     public static void saveVisitedPagesInSharedPreferences(Context context) {
 
+        for (Result result : newVisitedPagesArrayList) {
+
+            Log.d(TAG, "Trying Adding " + result.getTitle());
+
+        }
+
         if (newVisitedPagesArrayList.isEmpty()) {
             // If there is nothing new added, no need to procced
+            Log.d(TAG, "Nothing to add");
             return;
         }
 
         // 1.1 First Get The Stored Array list
         ArrayList<Result> storedResults = getStoredPagesArrayList(context);
 
+        Log.d(TAG, "Section 1.2");
+
         // 1.2 If there is an existing data we need to append new data to that
         if (storedResults != null) {
-            // Add Your New List Items to that
 
+            // Add Your New List Items to that
             for (Result result : newVisitedPagesArrayList) {
-                if (storedResults.contains(result)) {
-                    storedResults.remove(result);
+                Iterator<Result> iterator = storedResults.iterator();
+                while (iterator.hasNext()){
+                    if (result.getPageID().equals(iterator.next().getPageID())) {
+                        Log.d(TAG, "Found a match");
+                        iterator.remove();
+                    }
                 }
+
+                // Add a new result which will be displayed on Top now
                 storedResults.add(result);
             }
         } else {
+
+            Log.d(TAG, "Stored Results Is Empty");
+
             // For First Time We are adding something
             storedResults = newVisitedPagesArrayList;
         }
@@ -54,6 +73,8 @@ public class WikiResultsStorage {
         SharedPreferences.Editor editor = sharedpreferences.edit();
         editor.putString("jsonData", serializedJSONString);
         editor.apply();
+
+        newVisitedPagesArrayList.clear();
 
     }
 

@@ -80,11 +80,8 @@ public class SearchActivity extends AppCompatActivity {
 
     private void showPastVisitedPages() {
         visitedPages = WikiResultsStorage.getStoredPagesArrayList(SearchActivity.this);
-        Collections.reverse(visitedPages);
         if (visitedPages != null) {
-            for (Result result : visitedPages) {
-                Log.d(TAG, result.getTitle());
-            }
+            Collections.reverse(visitedPages);
             updateDisplayWithResultsData(visitedPages);
         }
     }

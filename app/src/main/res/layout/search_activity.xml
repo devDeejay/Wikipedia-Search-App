@@ -6,6 +6,15 @@
     android:layout_height="match_parent"
     tools:context=".UI.SearchActivity">
 
+    <ImageView
+        android:id="@+id/githubButton"
+        android:src="@drawable/git"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="30dp"
+        android:layout_marginRight="20dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp" />
+
     <RelativeLayout
         android:id="@+id/userInputLayout"
         android:layout_width="match_parent"
@@ -19,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:text="Wiki Search"
-            android:textColor="#555555"
+            android:textColor="#444444"
             android:textSize="25dp" />
 
         <TextView

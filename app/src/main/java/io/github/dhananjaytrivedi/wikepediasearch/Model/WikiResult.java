@@ -1,26 +1,13 @@
 package io.github.dhananjaytrivedi.wikepediasearch.Model;
 
-public class Result {
+public class WikiResult {
     String pageID;
     String title;
     String imageURL;
     String description;
 
-    public Result() {
-    }
 
-    public Result(String pageID, String title) {
-        this.pageID = pageID;
-        this.title = title;
-    }
-
-    public Result(String pageID, String title, String imageURL, String description) {
-        this.pageID = pageID;
-        this.title = title;
-        this.imageURL = imageURL;
-
-
-        this.description = description;
+    public WikiResult() {
     }
 
     public String getPageID() {
@@ -60,11 +47,9 @@ public class Result {
 
         if (o == this)
             return true;
-        if (!(o instanceof Result))
+        if (!(o instanceof WikiResult))
             return false;
 
-        Result object = (Result) o;
-
-        return (this.pageID == ((Result) o).pageID);
+        return (this.pageID.equals(((WikiResult) o).pageID));
     }
 }

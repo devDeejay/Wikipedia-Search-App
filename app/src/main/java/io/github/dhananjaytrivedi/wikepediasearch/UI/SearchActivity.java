@@ -1,9 +1,11 @@
 package io.github.dhananjaytrivedi.wikepediasearch.UI;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -35,17 +37,19 @@ import java.util.Iterator;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.github.dhananjaytrivedi.wikepediasearch.Adapter.ResultAdapter;
-import io.github.dhananjaytrivedi.wikepediasearch.DAO.WikiResultsStorage;
-import io.github.dhananjaytrivedi.wikepediasearch.Model.Result;
+import io.github.dhananjaytrivedi.wikepediasearch.DAO.Storage;
+import io.github.dhananjaytrivedi.wikepediasearch.Model.WikiResult;
 import io.github.dhananjaytrivedi.wikepediasearch.R;
 
 public class SearchActivity extends AppCompatActivity {
 
     final String TAG = "DJ";
-    ArrayList<Result> resultsList = new ArrayList<>();
-    ArrayList<Result> visitedPages = new ArrayList<>();
+    ArrayList<WikiResult> resultsList = new ArrayList<>();
+    ArrayList<WikiResult> visitedPages = new ArrayList<>();
     @BindView(R.id.searchResultSubmitButton)
     ImageView searchSubmitButton;
+    @BindView(R.id.githubButton)
+    ImageView githubButton;
     @BindView(R.id.inputQueryET)
     EditText inputQueryEditText;
     @BindView(R.id.recyclerView)
@@ -94,6 +98,16 @@ public class SearchActivity extends AppCompatActivity {
             }
         });
 
+        githubButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String URL = "https://github.com/DhananjayTrivedi/Wikipedia-Search-App";
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(URL));
+                startActivity(i);
+            }
+        });
+
     }
 
     @Override
@@ -118,7 +132,7 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     private void showPastVisitedPages() {
-        visitedPages = WikiResultsStorage.getStoredPagesArrayList(SearchActivity.this);
+        visitedPages = Storage.getStoredPagesArrayList(SearchActivity.this);
         if (visitedPages != null) {
             Collections.reverse(visitedPages);
             updateDisplayWithResultsData(visitedPages);
@@ -128,7 +142,7 @@ public class SearchActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        WikiResultsStorage.saveVisitedPagesInSharedPreferences(SearchActivity.this);
+        Storage.saveVisitedPagesInSharedPreferences(SearchActivity.this);
 
     }
 
@@ -178,7 +192,7 @@ public class SearchActivity extends AppCompatActivity {
 
     }
 
-    private void updateDisplayWithResultsData(ArrayList<Result> results) {
+    private void updateDisplayWithResultsData(ArrayList<WikiResult> results) {
         recyclerView.setVisibility(View.VISIBLE);
         errorMessage.setVisibility(View.INVISIBLE);
 
@@ -195,9 +209,9 @@ public class SearchActivity extends AppCompatActivity {
         errorMessage.setVisibility(View.VISIBLE);
     }
 
-    private ArrayList<Result> parseJSONData(String response) throws JSONException {
+    private ArrayList<WikiResult> parseJSONData(String response) throws JSONException {
 
-        ArrayList<Result> results = new ArrayList<>();
+        ArrayList<WikiResult> results = new ArrayList<>();
         JSONObject parentObject = new JSONObject(response);
         if (parentObject.has("query")) {
             JSONObject queryObject = parentObject.getJSONObject("query");
@@ -218,7 +232,7 @@ public class SearchActivity extends AppCompatActivity {
                     imageURL = thumbnailObject.getString("source");
                 }
 
-                Result result = new Result();
+                WikiResult result = new WikiResult();
                 result.setPageID(pageID);
                 result.setTitle(title);
                 result.setDescription(description);
@@ -228,7 +242,7 @@ public class SearchActivity extends AppCompatActivity {
 
             }
 
-            // Added all the results objects to the Result Array
+            // Added all the results objects to the WikiResult Array
 
             return results;
         } else {

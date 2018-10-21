@@ -6,12 +6,9 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -20,27 +17,22 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
-import io.github.dhananjaytrivedi.wikepediasearch.DAO.WikiResultsStorage;
-import io.github.dhananjaytrivedi.wikepediasearch.Model.Result;
+import io.github.dhananjaytrivedi.wikepediasearch.DAO.Storage;
+import io.github.dhananjaytrivedi.wikepediasearch.Model.WikiResult;
 import io.github.dhananjaytrivedi.wikepediasearch.R;
 
 public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ResultsViewHolder> {
 
-    String TAG = "DJ";
-    ArrayList<Result> resultArraylist;
-    Context context;
-    private int lastPosition;
+    private final String TAG = "DJ";
+    private ArrayList<WikiResult> resultArrayList;
+    private Context context;
 
-    // Result Adapter Constructor
+    // WikiResult Adapter Constructor
 
-    public ResultAdapter(ArrayList<Result> list, final Context context) {
+    public ResultAdapter(ArrayList<WikiResult> list, final Context context) {
 
         this.context = context;
-        this.resultArraylist = list;
-
-        for (Result result : list) {
-            Log.d(TAG, result.getTitle());
-        }
+        this.resultArrayList = list;
 
     }
 
@@ -63,11 +55,9 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ResultsVie
     @Override
     public void onBindViewHolder(@NonNull ResultsViewHolder holder, int position) {
 
-        lastPosition = position;
-
         // Here we get the view position, now we need to get Data to fill that position
 
-        Result object = resultArraylist.get(position);
+        WikiResult object = resultArrayList.get(position);
 
         String title = object.getTitle();
         String description = object.getDescription();
@@ -89,7 +79,7 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ResultsVie
 
     @Override
     public int getItemCount() {
-        return resultArraylist.size();
+        return resultArrayList.size();
     }
 
     // View holder class
@@ -106,7 +96,7 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ResultsVie
         Typeface titleFont = Typeface.createFromAsset(context.getAssets(), "fonts/result_heading.ttf");
         Typeface descFont = Typeface.createFromAsset(context.getAssets(), "fonts/result_description.ttf");
 
-        public ResultsViewHolder(View itemView) {
+        ResultsViewHolder(View itemView) {
             super(itemView);
 
             resultTitle = itemView.findViewById(R.id.resultTitle);
@@ -125,22 +115,8 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ResultsVie
         public void onClick(View view) {
             int position = getAdapterPosition();
 
-            Result result = resultArraylist.get(position);
+            WikiResult result = resultArrayList.get(position);
             String pageID = result.getPageID();
-
-            /*
-
-            // Custom Browser Activity Intent
-
-            String title = result.getTitle();
-            Intent i = new Intent(context, BrowserActivity.class);
-            i.putExtra("pageID", pageID);
-            i.putExtra("title", title);
-            context.startActivity(i);
-
-            */
-
-            // Mobile Browser Intent
 
             String URL = "https://en.wikipedia.org/wiki?curid=" + pageID;
             Intent i = new Intent(Intent.ACTION_VIEW);
@@ -148,7 +124,7 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ResultsVie
             context.startActivity(i);
 
             // Saving This Item As It is visited
-            WikiResultsStorage.addNewResultObjectToStore(result);
+            Storage.addNewResultObjectToStore(result);
 
         }
     }

@@ -14,24 +14,26 @@
         android:layout_marginRight="20dp">
 
         <TextView
-            android:id="@+id/wikepediaSearchTV"
+            android:id="@+id/headingTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:text="Wikepedia Search"
+            android:text="Wiki Search"
+            android:textColor="#555555"
             android:textSize="25dp" />
 
         <TextView
-            android:id="@+id/wikepediaSearchDesciptionTV"
+            android:id="@+id/subHeadingTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/wikepediaSearchTV"
+            android:layout_below="@id/headingTV"
             android:text="Feel free to search the whole universe" />
 
         <LinearLayout
+            android:id="@+id/searchBarLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/wikepediaSearchDesciptionTV"
+            android:layout_below="@id/subHeadingTV"
             android:layout_marginTop="20dp"
             android:background="#F0F2F5"
             android:orientation="horizontal"

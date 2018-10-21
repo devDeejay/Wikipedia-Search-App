@@ -2,6 +2,7 @@ package io.github.dhananjaytrivedi.wikepediasearch.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +10,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -26,6 +29,7 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ResultsVie
     String TAG = "DJ";
     ArrayList<Result> resultArraylist;
     Context context;
+    private int lastPosition;
 
     // Result Adapter Constructor
 
@@ -59,6 +63,8 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ResultsVie
     @Override
     public void onBindViewHolder(@NonNull ResultsViewHolder holder, int position) {
 
+        lastPosition = position;
+
         // Here we get the view position, now we need to get Data to fill that position
 
         Result object = resultArraylist.get(position);
@@ -76,8 +82,8 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ResultsVie
                 .placeholder(R.drawable.wiki_logo)
                 .error(R.drawable.wiki_logo)
                 .into(holder.resultImageView);
-
     }
+
 
     // Size of the list to be displayed
 
@@ -97,6 +103,9 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ResultsVie
         public ImageView resultImageView;
         public LinearLayout fullResultLayout;
 
+        Typeface titleFont = Typeface.createFromAsset(context.getAssets(), "fonts/result_heading.ttf");
+        Typeface descFont = Typeface.createFromAsset(context.getAssets(), "fonts/result_description.ttf");
+
         public ResultsViewHolder(View itemView) {
             super(itemView);
 
@@ -104,6 +113,9 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ResultsVie
             resultDescription = itemView.findViewById(R.id.resultDescription);
             resultImageView = itemView.findViewById(R.id.resultImageView);
             fullResultLayout = itemView.findViewById(R.id.fullResultLayout);
+
+            resultTitle.setTypeface(titleFont);
+            resultDescription.setTypeface(descFont);
 
             itemView.setOnClickListener(this);
 

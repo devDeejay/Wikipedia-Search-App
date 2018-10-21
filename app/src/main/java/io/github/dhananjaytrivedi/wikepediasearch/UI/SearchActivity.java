@@ -1,25 +1,29 @@
 package io.github.dhananjaytrivedi.wikepediasearch.UI;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.LinearInterpolator;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -49,6 +53,11 @@ public class SearchActivity extends AppCompatActivity {
     @BindView(R.id.errorMessageLayout)
     RelativeLayout errorMessage;
 
+    @BindView(R.id.headingTV)
+    TextView headingTV;
+    @BindView(R.id.subHeadingTV)
+    TextView subHeadingTV;
+
     private ResultAdapter adapter;
 
     @Override
@@ -59,23 +68,53 @@ public class SearchActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         errorMessage.setVisibility(View.INVISIBLE);
 
+        stopImageViewAnimation();
         showPastVisitedPages();
 
-        searchSubmitButton.setOnClickListener(new View.OnClickListener() {
+        Typeface headingFont = Typeface.createFromAsset(this.getAssets(), "fonts/heading.ttf");
+        Typeface subHeadingFont = Typeface.createFromAsset(this.getAssets(), "fonts/sub_heading.ttf");
+        headingTV.setTypeface(headingFont);
+        subHeadingTV.setTypeface(subHeadingFont);
+
+        inputQueryEditText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onClick(View view) {
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 errorMessage.setVisibility(View.INVISIBLE);
-                if (isNetworkAvailable()) {
-                    if (inputQueryEditText.getText().toString().equals("")) {
-                        showSnackbarMessage("We don't know what to look for");
-                    } else {
-                        getResultsFromAPI();
-                    }
-                } else {
-                    showSnackbarMessage("We need Internet Connectivity To Complete This Task");
-                }
+                startSearching();
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
             }
         });
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (inputQueryEditText.getText().toString().isEmpty()) {
+            showPastVisitedPages();
+        }
+    }
+
+    private void startSearching() {
+        if (isNetworkAvailable()) {
+            if (inputQueryEditText.getText().toString().equals("")) {
+                showPastVisitedPages();
+            } else {
+                startImageViewAnimation();
+                getResultsFromAPI();
+            }
+        } else {
+            showSnackbarMessage("We need Internet Connectivity To Complete This Task");
+        }
     }
 
     private void showPastVisitedPages() {
@@ -115,18 +154,22 @@ public class SearchActivity extends AppCompatActivity {
                 try {
                     resultsList = parseJSONData(response);
                     if (resultsList == null) {
-                        updateDisplayForNoData();
+                        stopImageViewAnimation();
                     } else {
                         updateDisplayWithResultsData(resultsList);
+                        stopImageViewAnimation();
                     }
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    stopImageViewAnimation();
                 }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.d(TAG, "ErrorListener : Error");
+
+                updateDisplayForNoData();
+                stopImageViewAnimation();
             }
         });
 
@@ -136,6 +179,8 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     private void updateDisplayWithResultsData(ArrayList<Result> results) {
+        recyclerView.setVisibility(View.VISIBLE);
+        errorMessage.setVisibility(View.INVISIBLE);
 
         Log.d(TAG, "*************** UPDATING LAYOUT ***************");
 
@@ -146,6 +191,7 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     private void updateDisplayForNoData() {
+        recyclerView.setVisibility(View.INVISIBLE);
         errorMessage.setVisibility(View.VISIBLE);
     }
 
@@ -199,5 +245,22 @@ public class SearchActivity extends AppCompatActivity {
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
+
+    public void startImageViewAnimation() {
+
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                searchSubmitButton.animate().rotation(360).withEndAction(this).setDuration(1000).setInterpolator(new LinearInterpolator()).start();
+            }
+        };
+
+        searchSubmitButton.animate().rotation(360).withEndAction(runnable).setDuration(1000).setInterpolator(new LinearInterpolator()).start();
+    }
+
+    public void stopImageViewAnimation() {
+        searchSubmitButton.animate().cancel();
+        searchSubmitButton.setRotation(0f);
     }
 }

@@ -7,9 +7,9 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/wiki_logo"
+        android:icon="@drawable/wiki_app_icon_white"
+        android:roundIcon="@drawable/wiki_app_icon_white"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".UI.SplashScreen">
@@ -19,8 +19,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity android:name=".UI.SearchActivity" />
-        <activity android:name=".UI.BrowserActivity"></activity>
+
     </application>
 
 </manifest>
